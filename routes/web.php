@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -13,10 +14,20 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// ── Home ───────────────────────────────────────────────────────
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// ── Public pages ───────────────────────────────────────────────
+Route::get('/',          [PageController::class, 'home'])->name('home');
+Route::get('/welcome',   [PageController::class, 'welcome'])->name('welcome');
+
+Route::get('/categories',            [PageController::class, 'categories'])->name('categories.index');
+Route::get('/categories/{category:slug}', [PageController::class, 'category'])->name('categories.show');
+
+Route::get('/products',           [PageController::class, 'products'])->name('products.index');
+Route::get('/products/{slug}',    [PageController::class, 'product'])->name('products.show');
+
+Route::get('/vendors', function () {
+    $vendors = \App\Models\Vendor::active()->verified()->with('user:id,name')->get();
+    return view('pages.vendors', compact('vendors'));
+})->name('vendors.index');
 
 // ── Guest (not logged in) ──────────────────────────────────────
 Route::middleware('guest')->group(function () {

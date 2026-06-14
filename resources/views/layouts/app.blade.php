@@ -32,7 +32,10 @@
 
                 {{-- Nav --}}
                 <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                    <a href="{{ route('home') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">Home</a>
+                    <a href="{{ route('home') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('home')) text-primary-600 dark:text-primary-400 @endif">Home</a>
+                    <a href="{{ route('products.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('products.*')) text-primary-600 dark:text-primary-400 @endif">Products</a>
+                    <a href="{{ route('categories.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('categories.*')) text-primary-600 dark:text-primary-400 @endif">Categories</a>
+                    <a href="{{ route('vendors.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('vendors.*')) text-primary-600 dark:text-primary-400 @endif">Vendors</a>
                     @auth
                         @if(auth()->user()->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">Dashboard</a>
