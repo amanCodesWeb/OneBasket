@@ -1,58 +1,177 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# OneBasket
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Hyperlocal fulfillment platform — connect local vendors, consolidate pickups, and deliver in a single package.
 
-## About Laravel
+Built with **Laravel 13** + **Tailwind CSS v4** (teal-600 accent, dark mode) + **MySQL 8**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **7 user roles** — Super Admin, Ops Manager, Vendor, Customer, Pickup Agent, Packing Staff, Delivery Agent
+- **Vendor Management** — CRUD, approval workflow, vendor portal with profile editing
+- **Product Catalog** — categories, products, variants, vendor inventory *(in progress)*
+- **API-first** — Sanctum token auth, versioned API (`/api/v1/`) for mobile app integration
+- **Dark mode** — class-based toggle with localStorage persistence
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Getting Started
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- PHP 8.3+
+- Composer 2
+- MySQL 8.0+
+- Node.js 20+ & npm
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Installation
 
 ```bash
-composer require laravel/boost --dev
+# Clone & install
+git clone https://github.com/amanCodesWeb/OneBasket.git
+cd OneBasket
+composer install
+npm install
 
-php artisan boost:install
+# Configure environment
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Edit `.env` to set your database credentials:
 
-## Contributing
+```
+DB_DATABASE=onebasket
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Database Setup
 
-## Code of Conduct
+```bash
+# Create the database
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS onebasket"
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Run migrations & seeders
+php artisan migrate:fresh
+php artisan db:seed
+```
 
-## Security Vulnerabilities
+### Build frontend & serve
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+npm run build
+# or for development:
+npm run dev
 
-## License
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Default Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| Super Admin | `admin@admin.com` | `12345` |
+| Vendor | `bakery@onebasket.test` | `password` |
+| Vendor | `green-grocer@onebasket.test` | `password` |
+| Vendor (pending) | `pharmacy@onebasket.test` | `password` |
+
+---
+
+## Project Structure (key directories)
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── Admin/          # Admin CRUD controllers
+│   │   ├── Api/            # API v1 controllers (Sanctum)
+│   │   ├── Vendor/         # Vendor portal controllers
+│   │   └── AuthController.php
+│   └── Middleware/
+│       └── CheckRole.php   # Role-based access middleware
+├── Models/
+│   ├── User.php            # HasApiTokens, 7 role constants
+│   └── Vendor.php          # Scopes, status constants
+database/
+├── migrations/
+└── seeders/
+    ├── AdminUserSeeder.php
+    └── VendorSeeder.php
+resources/
+├── css/app.css             # Tailwind v4 config + theme
+├── js/app.js
+└── views/
+    ├── layouts/            # app, admin, guest layouts
+    ├── admin/vendors/      # Admin vendor management views
+    ├── vendor/             # Vendor portal views
+    └── pages/              # Auth pages (login, register)
+routes/
+├── web.php                 # Web routes (auth, admin, vendor)
+└── api.php                 # API v1 routes (public + Sanctum)
+```
+
+---
+
+## Roles & Permissions
+
+| Role | Access |
+|---|---|
+| `super_admin` | Full admin panel access |
+| `ops_manager` | Admin panel (no settings) |
+| `vendor` | Vendor portal only |
+| `customer` | Customer features *(coming soon)* |
+| `pickup_agent` | Pickup workflow *(coming soon)* |
+| `packing_staff` | Packing workflow *(coming soon)* |
+| `delivery_agent` | Delivery workflow *(coming soon)* |
+
+---
+
+## API Endpoints
+
+All under `/api/v1/`. Public endpoints don't need authentication; authenticated ones require a Sanctum Bearer token.
+
+### Public
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/register` | Create account |
+| POST | `/api/v1/login` | Get Sanctum token |
+| GET | `/api/v1/vendors` | List active vendors (paginated, searchable) |
+| GET | `/api/v1/vendors/{id}` | Get vendor details |
+
+### Authenticated
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/logout` | Revoke current token |
+| GET | `/api/v1/user` | Get authenticated user |
+| PUT | `/api/v1/vendor/profile` | Update own vendor profile |
+
+---
+
+## Roadmap
+
+- [x] Foundation (Sanctum, roles, layouts, auth, dark mode, admin dashboard)
+- [x] Vendor Management (CRUD, approval, portal, API)
+- [ ] Product Catalog (categories, products, variants, inventory)
+- [ ] Shopping Cart & Checkout
+- [ ] Order Management & Fulfillment
+- [ ] Pickup Agent App
+- [ ] Packing & Hub Operations
+- [ ] Delivery & GPS Tracking
+- [ ] Customer Portal & Notifications
+- [ ] Operations Dashboard & Reporting
+
+---
+
+## Built With
+
+- [Laravel 13](https://laravel.com)
+- [Laravel Sanctum](https://laravel.com/docs/sanctum)
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [MySQL 8](https://www.mysql.com)
+- [Vite](https://vitejs.dev)
