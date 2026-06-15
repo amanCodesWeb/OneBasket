@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\ProfileController;
+use App\Http\Controllers\VendorApplicationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +31,16 @@ Route::get('/vendors', function () {
     $vendors = \App\Models\Vendor::active()->verified()->with('user:id,name')->get();
     return view('pages.vendors', compact('vendors'));
 })->name('vendors.index');
+
+// ── Vendor Application (public) ───────────────────────────────
+Route::get('/apply/vendor',  [VendorApplicationController::class, 'showForm'])->name('vendor.apply');
+Route::post('/apply/vendor', [VendorApplicationController::class, 'submit'])->name('vendor.apply.submit');
+
+// ── Admin Login (separate from public login) ───────────────────
+Route::middleware('guest')->prefix('admin')->group(function () {
+    Route::get('/login',  [AdminAuthController::class, 'showLogin'])->name('admin.login');
+    Route::post('/login', [AdminAuthController::class, 'login']);
+});
 
 // ── Guest (not logged in) ──────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -64,6 +77,15 @@ Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->na
     Route::post('/vendors/{vendor}/reject', [VendorController::class, 'reject'])->name('vendors.reject');
     Route::post('/vendors/{vendor}/suspend', [VendorController::class, 'suspend'])->name('vendors.suspend');
     Route::post('/vendors/{vendor}/activate', [VendorController::class, 'activate'])->name('vendors.activate');
+
+    // Product management
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 
 // ── Vendor Portal (vendors only) ───────────────────────────────
