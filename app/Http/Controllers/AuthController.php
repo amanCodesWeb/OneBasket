@@ -41,6 +41,10 @@ class AuthController extends Controller
                 return redirect()->intended(route('admin.dashboard'));
             }
 
+            if ($user->isVendor()) {
+                return redirect()->intended(route('vendor.dashboard'));
+            }
+
             return redirect()->intended(route('home'));
         }
 
