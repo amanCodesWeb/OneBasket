@@ -8,6 +8,25 @@
         <a href="{{ route('admin.vendors.index') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition">&larr; Back to Vendors</a>
     </div>
 
+    @if(session('vendor_password'))
+        <div class="mb-6 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="font-medium text-green-800 dark:text-green-200">Vendor Approved!</p>
+                    <p class="text-sm text-green-700 dark:text-green-300 mt-1">Share these credentials with the vendor:</p>
+                    <div class="mt-3 p-3 rounded-lg bg-green-100 dark:bg-green-900/40 font-mono text-sm">
+                        <p><span class="text-green-600 dark:text-green-400">Email:</span> <strong class="text-green-800 dark:text-green-200">{{ session('vendor_email') }}</strong></p>
+                        <p class="mt-1"><span class="text-green-600 dark:text-green-400">Password:</span> <strong class="text-green-800 dark:text-green-200">{{ session('vendor_password') }}</strong></p>
+                    </div>
+                    <p class="text-xs text-green-600 dark:text-green-400 mt-2">Make sure to save this — it will not be shown again.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- Main info --}}
         <div class="lg:col-span-2 space-y-6">

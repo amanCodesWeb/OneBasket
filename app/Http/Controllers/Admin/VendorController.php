@@ -113,7 +113,16 @@ class VendorController extends Controller
             'verified_at' => now(),
         ]);
 
-        return back()->with('success', 'Vendor approved and verified.');
+        // Generate and set a password for the vendor user if they don't have one set
+        // (they were created with a random one during application)
+        $password = \Illuminate\Support\Str::random(10);
+        $vendor->user->update([
+            'password' => bcrypt($password),
+        ]);
+
+        return back()->with('success', 'Vendor approved and verified.')
+            ->with('vendor_password', $password)
+            ->with('vendor_email', $vendor->user->email);
     }
 
     public function reject(Vendor $vendor): RedirectResponse
