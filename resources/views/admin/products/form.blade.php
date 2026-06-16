@@ -4,150 +4,270 @@
 @section('heading', isset($product) ? 'Edit Product' : 'New Product')
 
 @section('content')
-    <div class="max-w-3xl">
+    {{-- Back link --}}
+    <div class="mb-5 fade-in">
+        <a href="{{ route('admin.products.index') }}" 
+           class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
+            <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Products
+        </a>
+    </div>
+
+    <div class="max-w-4xl">
         <form method="POST" action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-6">
             @csrf
             @if(isset($product)) @method('PUT') @endif
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Basic Information</h3>
-
-                {{-- Name --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name *</label>
-                    <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}" required
-                           class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('name') border-red-500 @enderror">
-                    @error('name') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                </div>
-
-                {{-- Description --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                    <textarea name="description" rows="4"
-                              class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('description') border-red-500 @enderror">{{ old('description', $product->description ?? '') }}</textarea>
-                    @error('description') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                </div>
-
-                {{-- Vendor + Category --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vendor *</label>
-                        <select name="vendor_id" required
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('vendor_id') border-red-500 @enderror">
-                            <option value="">Select vendor...</option>
-                            @foreach($vendors as $vendor)
-                                <option value="{{ $vendor->id }}" {{ old('vendor_id', $product->vendor_id ?? '') == $vendor->id ? 'selected' : '' }}>
-                                    {{ $vendor->business_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('vendor_id') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
+            {{-- Basic Information --}}
+            <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/10 dark:to-transparent">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select name="category_id"
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('category_id') border-red-500 @enderror">
-                            <option value="">No category</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id ?? '') == $cat->id ? 'selected' : '' }}
-                                    @if($cat->children->count()) class="font-medium" @endif>
-                                    {{ $cat->name }}
-                                </option>
-                                @foreach($cat->children as $child)
-                                    <option value="{{ $child->id }}" {{ old('category_id', $product->category_id ?? '') == $child->id ? 'selected' : '' }}>
-                                        &nbsp;&nbsp;— {{ $child->name }}
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        </select>
-                        @error('category_id') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Basic Information</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Product name, description, vendor &amp; category</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pricing & Inventory</h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {{-- Price --}}
+                <div class="p-6 space-y-5">
+                    {{-- Name --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (Rs.) *</label>
-                        <input type="number" step="0.01" min="0" name="price" value="{{ old('price', $product->price ?? '') }}" required
-                               class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('price') border-red-500 @enderror">
-                        @error('price') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                    </div>
-                    {{-- Compare Price --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Compare Price (Rs.)</label>
-                        <input type="number" step="0.01" min="0" name="compare_price" value="{{ old('compare_price', $product->compare_price ?? '') }}"
-                               class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('compare_price') border-red-500 @enderror"
-                               placeholder="Original/higher price">
-                        @error('compare_price') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {{-- Stock --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Quantity *</label>
-                        <input type="number" min="0" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" required
-                               class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('stock_quantity') border-red-500 @enderror">
-                        @error('stock_quantity') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                    </div>
-                    {{-- Unit --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit</label>
-                        <input type="text" name="unit" value="{{ old('unit', $product->unit ?? '') }}"
-                               class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none @error('unit') border-red-500 @enderror"
-                               placeholder="e.g. kg, piece, liter">
-                        @error('unit') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status & Visibility</h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {{-- Status --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select name="status" required
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none">
-                            @foreach($statuses as $s)
-                                <option value="{{ $s }}" {{ old('status', $product->status ?? 'draft') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Featured --}}
-                    <div class="flex items-center pt-6">
-                        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            <input type="hidden" name="featured" value="0">
-                            <input type="checkbox" name="featured" value="1"
-                                   class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
-                                   {{ old('featured', $product->featured ?? false) ? 'checked' : '' }}>
-                            <span>Featured product</span>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Product Name <span class="text-red-500">*</span>
                         </label>
+                        <div class="relative">
+                            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                            </svg>
+                            <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}" required
+                                   class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('name') border-red-500 dark:border-red-500 @enderror"
+                                   placeholder="e.g. Organic Bananas">
+                        </div>
+                        @error('name') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
                     </div>
-                </div>
 
-                {{-- Images JSON (simple textarea for now) --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Images (JSON array of URLs)</label>
-                    <input type="text" name="images" value="{{ old('images', is_array($product->images ?? null) ? json_encode($product->images) : ($product->images ?? '[]')) }}"
-                           class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none font-mono text-xs"
-                           placeholder='["https://example.com/image.jpg"]'>
-                    @error('images') <p class="mt-1 text-sm text-red-500">{{ $message }}</p> @enderror
+                    {{-- Description --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
+                        <textarea name="description" rows="4"
+                                  class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('description') border-red-500 dark:border-red-500 @enderror"
+                                  placeholder="Describe the product...">{{ old('description', $product->description ?? '') }}</textarea>
+                        @error('description') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Vendor + Category --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Vendor <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                <select name="vendor_id" required
+                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-8 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition appearance-none @error('vendor_id') border-red-500 dark:border-red-500 @enderror">
+                                    <option value="" class="text-gray-400">Select vendor...</option>
+                                    @foreach($vendors as $vendor)
+                                        <option value="{{ $vendor->id }}" {{ old('vendor_id', $product->vendor_id ?? '') == $vendor->id ? 'selected' : '' }}>
+                                            {{ $vendor->business_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            @error('vendor_id') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Category</label>
+                            <div class="relative">
+                                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                                <select name="category_id"
+                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-8 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition appearance-none @error('category_id') border-red-500 dark:border-red-500 @enderror">
+                                    <option value="" class="text-gray-400">No category</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id ?? '') == $cat->id ? 'selected' : '' }}
+                                            @if($cat->children->count()) class="font-medium" @endif>
+                                            {{ $cat->name }}
+                                        </option>
+                                        @foreach($cat->children as $child)
+                                            <option value="{{ $child->id }}" {{ old('category_id', $product->category_id ?? '') == $child->id ? 'selected' : '' }}>
+                                                &nbsp;&nbsp;— {{ $child->name }}
+                                            </option>
+                                        @endforeach
+                                    @endforeach
+                                </select>
+                                <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            @error('category_id') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {{-- Actions --}}
-            <div class="flex items-center gap-3">
-                <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-                    {{ isset($product) ? 'Update Product' : 'Create Product' }}
-                </button>
-                <a href="{{ route('admin.products.index') }}" class="text-gray-500 dark:text-gray-400 hover:underline text-sm">Cancel</a>
+            {{-- Pricing & Inventory --}}
+            <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/10 dark:to-transparent">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pricing &amp; Inventory</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Price, stock quantity, and unit</p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {{-- Price --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Price (Rs.) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400 pointer-events-none">Rs.</span>
+                                <input type="number" step="0.01" min="0" name="price" value="{{ old('price', $product->price ?? '') }}" required
+                                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('price') border-red-500 dark:border-red-500 @enderror"
+                                       placeholder="0.00">
+                            </div>
+                            @error('price') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                        {{-- Compare Price --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Compare Price (Rs.)</label>
+                            <div class="relative">
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400 pointer-events-none">Rs.</span>
+                                <input type="number" step="0.01" min="0" name="compare_price" value="{{ old('compare_price', $product->compare_price ?? '') }}"
+                                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('compare_price') border-red-500 dark:border-red-500 @enderror"
+                                       placeholder="0.00">
+                            </div>
+                            @error('compare_price') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {{-- Stock --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                                Stock Quantity <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <input type="number" min="0" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" required
+                                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('stock_quantity') border-red-500 dark:border-red-500 @enderror"
+                                       placeholder="0">
+                            </div>
+                            @error('stock_quantity') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                        {{-- Unit --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unit</label>
+                            <div class="relative">
+                                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2 4h20M2 8h20M2 12h20M2 16h20M2 20h20"/>
+                                </svg>
+                                <input type="text" name="unit" value="{{ old('unit', $product->unit ?? '') }}"
+                                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('unit') border-red-500 dark:border-red-500 @enderror"
+                                       placeholder="e.g. kg, piece, liter">
+                            </div>
+                            @error('unit') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Status & Visibility --}}
+            <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/10 dark:to-transparent">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Status &amp; Visibility</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Product status, featured flag, and images</p>
+                    </div>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        {{-- Status --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+                            <div class="relative">
+                                <select name="status" required
+                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 pr-8 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition appearance-none">
+                                    @foreach($statuses as $s)
+                                        <option value="{{ $s }}" {{ old('status', $product->status ?? 'draft') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+                                    @endforeach
+                                </select>
+                                <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+
+                        {{-- Featured --}}
+                        <div class="flex items-end pb-1">
+                            <label class="relative inline-flex items-center gap-3 cursor-pointer">
+                                <input type="hidden" name="featured" value="0">
+                                <input type="checkbox" name="featured" value="1"
+                                       class="sr-only peer"
+                                       {{ old('featured', $product->featured ?? false) ? 'checked' : '' }}>
+                                <div class="w-10 h-6 rounded-full bg-gray-200 dark:bg-gray-600 peer-checked:bg-primary-500 peer-focus:ring-2 peer-focus:ring-primary-500/30 transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-4"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Featured product</span>
+                                    <span class="text-xs text-gray-400">Show in featured listings</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Images --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Images (JSON array of URLs)</label>
+                        <div class="relative">
+                            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <input type="text" name="images" value="{{ old('images', is_array($product->images ?? null) ? json_encode($product->images) : ($product->images ?? '[]')) }}"
+                                   class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition font-mono @error('images') border-red-500 dark:border-red-500 @enderror"
+                                   placeholder='["https://example.com/image.jpg"]'>
+                        </div>
+                        @error('images') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Form Actions --}}
+            <div class="flex items-center justify-between gap-4 p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/80">
+                <div class="text-xs text-gray-400">
+                    <span class="text-red-500">*</span> Required fields
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('admin.products.index') }}" 
+                       class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md hover:shadow-primary-500/20">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            @if(isset($product))
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            @endif
+                        </svg>
+                        {{ isset($product) ? 'Update Product' : 'Create Product' }}
+                    </button>
+                </div>
             </div>
         </form>
     </div>

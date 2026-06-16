@@ -4,27 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name')) — {{ config('app.name') }}</title>
+    <title>@yield('title') — {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        .guest-bg {
-            background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 50%, #f0fdfa 100%);
-        }
-        .dark .guest-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-        }
-        .guest-bg::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(13, 148, 136, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
-            pointer-events: none;
-        }
-    </style>
 </head>
-<body class="min-h-screen guest-bg text-gray-900 dark:text-gray-100 antialiased flex flex-col items-center justify-center px-4 relative">
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100 antialiased flex flex-col">
     <script>
         if (localStorage.getItem('onebasket-theme') === 'dark' ||
             (!localStorage.getItem('onebasket-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -34,27 +17,31 @@
         }
     </script>
 
-    <div class="w-full max-w-md relative z-10">
-        <div class="text-center mb-8">
-            <a href="/" class="inline-flex items-center gap-2 text-2xl font-bold text-primary-600 dark:text-primary-400">
-                <div class="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 text-primary-600 dark:text-primary-400 font-bold">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                     </svg>
+                    OneBasket
+                </a>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('login') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition">Sign in</a>
+                    <a href="{{ route('register') }}" class="ml-2 px-4 py-1.5 text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition shadow-sm">Register</a>
                 </div>
-                <span>OneBasket</span>
-            </a>
+            </div>
         </div>
+    </header>
 
-        <div class="bg-white/90 dark:bg-gray-800/90 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/50 p-6 sm:p-8 backdrop-blur-xl">
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md slide-up">
             @yield('content')
         </div>
+    </main>
 
-        <p class="text-center mt-6 text-sm text-gray-400 dark:text-gray-600">
-            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
-        </p>
-    </div>
-
-    @stack('scripts')
+    <footer class="text-center py-6 text-xs text-gray-400 dark:text-gray-600">
+        &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+    </footer>
 </body>
 </html>
