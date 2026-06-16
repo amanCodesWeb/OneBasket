@@ -38,6 +38,17 @@
                     <a href="{{ route('vendors.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('vendors.*')) text-primary-600 dark:text-primary-400 @endif">Vendors</a>
                     <a href="{{ route('vendor.apply') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition @if(request()->routeIs('vendor.apply*')) text-primary-600 dark:text-primary-400 @endif">Sell</a>
                     @auth
+                        <a href="{{ route('orders.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition text-sm font-medium">My Orders</a>
+                        {{-- Cart link --}}
+                        <a href="{{ route('cart.index') }}" class="relative text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+                            </svg>
+                            @php $cartCount = \App\Models\Cart::where('user_id', Auth::id())->sum('quantity'); @endphp
+                            @if($cartCount > 0)
+                                <span class="absolute -top-1.5 -right-1.5 bg-primary-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
+                            @endif
+                        </a>
                         {{-- Admin nav only visible to admins, via admin panel URL --}}
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf

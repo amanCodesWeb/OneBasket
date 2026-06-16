@@ -63,9 +63,41 @@
                         Out of Stock
                     </span>
                 @endif
-            </div>
+                </div>
 
-            {{-- Description --}}
+                {{-- Add to Cart --}}
+                @auth
+                @if($product->stock_quantity > 0)
+                    <form method="POST" action="{{ route('cart.add') }}" class="mt-6 flex items-center gap-3">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                            <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'))"
+                                    class="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-lg font-medium">−</button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock_quantity }}"
+                                   class="w-16 text-center border-x border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-0 outline-none py-2">
+                            <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'))"
+                                    class="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-lg font-medium">+</button>
+                        </div>
+                        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-semibold transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </form>
+                @else
+                    <button disabled class="mt-6 bg-gray-100 dark:bg-gray-700 text-gray-400 px-6 py-2.5 rounded-lg font-semibold cursor-not-allowed">
+                        Out of Stock
+                    </button>
+                @endif
+                @else
+                <a href="{{ route('login') }}" class="mt-6 inline-block bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-semibold transition">
+                    Login to Purchase
+                </a>
+                @endauth
+
+                {{-- Description --}}
             @if($product->description)
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Description</h3>

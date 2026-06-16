@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CartController as ApiCartController;
+use App\Http\Controllers\Api\OrderController as ApiOrderController;
 use App\Http\Controllers\Api\VendorController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +28,16 @@ Route::prefix('v1')->group(function () {
 
         // Vendor profile (own)
         Route::put('/vendor/profile', [VendorController::class, 'update']);
+
+        // ── Cart ───────────────────────────────────────────
+        Route::get('/cart',          [ApiCartController::class, 'index']);
+        Route::post('/cart/add',     [ApiCartController::class, 'add']);
+        Route::post('/cart/clear',   [ApiCartController::class, 'clear']);
+        Route::patch('/cart/{cart}', [ApiCartController::class, 'update']);
+        Route::delete('/cart/{cart}',[ApiCartController::class, 'destroy']);
+
+        // ── Orders ──────────────────────────────────────────
+        Route::get('/orders',          [ApiOrderController::class, 'index']);
+        Route::get('/orders/{order}',  [ApiOrderController::class, 'show']);
     });
 });

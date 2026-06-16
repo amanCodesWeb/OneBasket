@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\ProfileController;
@@ -57,6 +61,22 @@ Route::middleware('auth')->group(function () {
     // Email verification
     Route::get('/email/verify', [AuthController::class, 'notice'])->name('verification.notice');
     Route::post('/email/resend', [AuthController::class, 'resend'])->name('verification.resend');
+
+    // ── Cart ──────────────────────────────────────────────────
+    Route::get('/cart',        [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add',   [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/count',  [CartController::class, 'count'])->name('cart.count');
+    Route::patch('/cart/{cart}',   [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{cart}',  [CartController::class, 'remove'])->name('cart.remove');
+
+    // ── Checkout ──────────────────────────────────────────────
+    Route::get('/checkout',        [CheckoutController::class, 'review'])->name('checkout.review');
+    Route::post('/checkout/place', [CheckoutController::class, 'place'])->name('checkout.place');
+
+    // ── Orders ────────────────────────────────────────────────
+    Route::get('/orders',        [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
 // ── Admin (Super Admin + Ops Manager) ──────────────────────────
@@ -86,6 +106,11 @@ Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->na
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+    // Order management
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
 });
 
 // ── Vendor Portal (vendors only) ───────────────────────────────
