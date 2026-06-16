@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\ProfileController;
+use App\Http\Controllers\Vendor\AuthController as VendorAuthController;
 use App\Http\Controllers\VendorApplicationController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,12 @@ Route::post('/apply/vendor', [VendorApplicationController::class, 'submit'])->na
 Route::middleware('guest')->prefix('admin')->group(function () {
     Route::get('/login',  [AdminAuthController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login']);
+});
+
+// ── Vendor Login (separate from public login) ─────────────────
+Route::middleware('guest')->prefix('vendor')->group(function () {
+    Route::get('/login',  [VendorAuthController::class, 'showLogin'])->name('vendor.login');
+    Route::post('/login', [VendorAuthController::class, 'login']);
 });
 
 // ── Guest (not logged in) ──────────────────────────────────────
