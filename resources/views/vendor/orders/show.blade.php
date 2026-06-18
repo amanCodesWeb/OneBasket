@@ -21,8 +21,15 @@
                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order Number</p>
                     <p class="text-lg font-bold text-gray-900 dark:text-white font-mono mt-0.5">#{{ $order->order_number }}</p>
                 </div>
-                <div>
-                    {!! $order->status_badge !!}
+                <div class="flex items-center gap-2">
+                    <div class="text-right">
+                        <p class="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Fulfillment</p>
+                        {!! $order->status_badge !!}
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Delivery</p>
+                        {!! $order->order_status_badge !!}
+                    </div>
                 </div>
             </div>
 

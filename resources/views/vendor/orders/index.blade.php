@@ -84,6 +84,7 @@
                             <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Qty</th>
                             <th class="text-right px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Total</th>
                             <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                            <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Delivery</th>
                             <th class="text-left px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
                             <th class="text-right px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400"></th>
                         </tr>
@@ -140,6 +141,18 @@
                                                 @break
                                         @endswitch
                                         {{ $order->status_label }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium
+                                        @switch($order->order_status)
+                                            @case('open') bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-700/50 @break
+                                            @case('shipped') bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/50 @break
+                                            @case('delivered') bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 @break
+                                            @case('cancelled') bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700/50 @break
+                                            @default bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 @endswitch
+                                    ">
+                                        {{ $order->order_status_label }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">

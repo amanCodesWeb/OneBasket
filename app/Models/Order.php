@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class Order extends Model
 {
     protected $fillable = [
-        'user_id', 'order_number', 'status',
+        'user_id', 'order_number', 'status', 'order_status',
         'subtotal', 'total_item_count', 'notes',
     ];
 
@@ -22,7 +22,7 @@ class Order extends Model
         ];
     }
 
-    // ── Status constants ─────────────────────────────────────────
+    // ── Vendor fulfillment status constants ────────────────────
     const STATUS_PENDING          = 'pending';
     const STATUS_CONFIRMED        = 'confirmed';
     const STATUS_PROCESSING       = 'processing';
@@ -58,6 +58,19 @@ class Order extends Model
         self::STATUS_OUT_FOR_DELIVERY,
         self::STATUS_DELIVERED,
         self::STATUS_CANCELLED,
+    ];
+
+    // ── Platform / Customer-facing order status constants ──────
+    const ORDER_STATUS_OPEN      = 'open';
+    const ORDER_STATUS_SHIPPED   = 'shipped';
+    const ORDER_STATUS_DELIVERED = 'delivered';
+    const ORDER_STATUS_CANCELLED = 'cancelled';
+
+    public static array $orderStatuses = [
+        self::ORDER_STATUS_OPEN,
+        self::ORDER_STATUS_SHIPPED,
+        self::ORDER_STATUS_DELIVERED,
+        self::ORDER_STATUS_CANCELLED,
     ];
 
     // ── Boot ──────────────────────────────────────────────────────
@@ -98,7 +111,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // ── Accessors ─────────────────────────────────────────────────
+    // ── Vendor fulfillment status accessors ──────────────────────
     public function getFormattedSubtotalAttribute(): string
     {
         return 'Rs. ' . number_format($this->subtotal, 2);
@@ -140,5 +153,32 @@ class Order extends Model
         $color = $colors[$this->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
 
         return "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {$color}\">{$this->status_label}</span>";
+    }
+
+    // ── Order status accessors (customer-facing) ───────────────
+    public function getOrderStatusLabelAttribute(): string
+    {
+        $labels = [
+            self::ORDER_STATUS_OPEN      => 'Open',
+            self::ORDER_STATUS_SHIPPED   => 'Shipped',
+            self::ORDER_STATUS_DELIVERED => 'Delivered',
+            self::ORDER_STATUS_CANCELLED => 'Cancelled',
+        ];
+
+        return $labels[$this->order_status] ?? ucfirst($this->order_status);
+    }
+
+    public function getOrderStatusBadgeAttribute(): string
+    {
+        $colors = [
+            self::ORDER_STATUS_OPEN      => 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
+            self::ORDER_STATUS_SHIPPED   => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+            self::ORDER_STATUS_DELIVERED => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+            self::ORDER_STATUS_CANCELLED => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+        ];
+
+        $color = $colors[$this->order_status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+
+        return "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {$color}\">{$this->order_status_label}</span>";
     }
 }

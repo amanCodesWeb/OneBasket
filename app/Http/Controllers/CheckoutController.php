@@ -60,6 +60,7 @@ class CheckoutController extends Controller
             $order = Order::create([
                 'user_id'          => Auth::id(),
                 'status'           => Order::STATUS_PENDING,
+                'order_status'     => Order::ORDER_STATUS_OPEN,
                 'subtotal'         => $subtotal,
                 'total_item_count' => $itemCount,
                 'notes'            => $request->input('notes'),
