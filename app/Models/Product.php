@@ -11,7 +11,7 @@ class Product extends Model
     protected $fillable = [
         'vendor_id', 'category_id', 'name', 'slug', 'description',
         'price', 'compare_price', 'images', 'status', 'featured',
-        'stock_quantity', 'unit',
+        'stock_quantity', 'unit', 'is_approved',
     ];
 
     protected function casts(): array
@@ -22,6 +22,7 @@ class Product extends Model
             'images'        => 'array',
             'featured'      => 'boolean',
             'stock_quantity'=> 'integer',
+            'is_approved'   => 'boolean',
         ];
     }
 
@@ -29,6 +30,8 @@ class Product extends Model
     public function scopeActive($q)   { return $q->where('status', 'active'); }
     public function scopeFeatured($q) { return $q->where('featured', true); }
     public function scopeInStock($q)  { return $q->where('stock_quantity', '>', 0); }
+    public function scopeApproved($q) { return $q->where('is_approved', true); }
+    public function scopePendingApproval($q) { return $q->where('is_approved', false); }
 
     // ── Relationships ────────────────────────────────────────────
     public function vendor(): BelongsTo

@@ -13,6 +13,7 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {{ $products->total() ?? $products->count() }} product{{ ($products->total() ?? $products->count()) !== 1 ? 's' : '' }} 
                     @if(request('status')) in <span class="text-primary-600 dark:text-primary-400 capitalize">{{ request('status') }}</span> status @endif
+                    @if(request('approval') === 'pending') <span class="text-amber-600">(pending approval)</span> @endif
                 </p>
             </div>
             <div class="flex gap-3">
@@ -32,20 +33,20 @@
             </div>
         </div>
 
-        {{-- Status filter tabs --}}
+        {{-- Status + Approval filter tabs --}}
         <div class="flex gap-1.5 mt-4 flex-wrap relative z-10">
-            <a href="{{ route('admin.products.index') }}" 
+            <a href="{{ route('admin.products.index', request()->except(['status', 'approval'])) }}" 
                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150
-                      {{ !request('status') ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-transparent' }}">
+                      {{ !request('status') && !request('approval') ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-transparent' }}">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
                 All
             </a>
             @foreach($statuses as $s)
-                <a href="{{ route('admin.products.index', ['status' => $s]) }}" 
+                <a href="{{ route('admin.products.index', array_merge(request()->except('status'), ['status' => $s])) }}" 
                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg capitalize transition-all duration-150
-                          {{ request('status') === $s ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-transparent' }}">
+                          {{ request('status') === $s && !request('approval') ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-transparent' }}">
                     @switch($s)
                         @case('active') <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> @break
                         @case('inactive') <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> @break
@@ -54,6 +55,19 @@
                     {{ $s }}
                 </a>
             @endforeach
+
+            {{-- Approval filter --}}
+            <a href="{{ route('admin.products.index', array_merge(request()->except('approval'), ['approval' => 'pending'])) }}" 
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150
+                      {{ request('approval') === 'pending' ? 'bg-amber-600 text-white shadow-sm shadow-amber-500/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-transparent' }}">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                </svg>
+                Pending Approval
+                @if($pendingCount > 0)
+                    <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-bold bg-white/20 text-white">{{ $pendingCount }}</span>
+                @endif
+            </a>
         </div>
     </div>
 
@@ -69,7 +83,7 @@
                             <th class="text-left px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Category</th>
                             <th class="text-right px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Price</th>
                             <th class="text-center px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Stock</th>
-                            <th class="text-center px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Featured</th>
+                            <th class="text-center px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Approval</th>
                             <th class="text-left px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Status</th>
                             <th class="text-right px-4 py-3.5 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Actions</th>
                         </tr>
@@ -136,13 +150,15 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3.5 text-center">
-                                    @if($product->featured)
-                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-500" title="Featured">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    @if($product->is_approved)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            Approved
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600" title="Not featured">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                                            Pending
                                         </span>
                                     @endif
                                 </td>
@@ -165,6 +181,28 @@
                                 </td>
                                 <td class="px-4 py-3.5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
+                                        @if(!$product->is_approved)
+                                            <form method="POST" action="{{ route('admin.products.approve', $product) }}" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                                                   title="Approve product"
+                                                   onclick="return confirm('Approve this product? It will become active.')">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.products.reject', $product) }}" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                                                   title="Reject product"
+                                                   onclick="return confirm('Reject this product? It will stay inactive.')">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('admin.products.show', $product) }}" 
                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors" 
                                            title="View details">

@@ -21,6 +21,14 @@ class ProductController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('approval')) {
+            if ($request->approval === 'pending') {
+                $query->where('is_approved', false);
+            } elseif ($request->approval === 'approved') {
+                $query->where('is_approved', true);
+            }
+        }
+
         if ($request->filled('vendor_id')) {
             $query->where('vendor_id', $request->vendor_id);
         }
@@ -36,8 +44,9 @@ class ProductController extends Controller
         $products = $query->latest()->paginate(15);
         $statuses = ['active', 'inactive', 'draft'];
         $vendors  = Vendor::active()->get();
+        $pendingCount = Product::where('is_approved', false)->count();
 
-        return view('admin.products.index', compact('products', 'statuses', 'vendors'));
+        return view('admin.products.index', compact('products', 'statuses', 'vendors', 'pendingCount'));
     }
 
     public function create(): View
@@ -67,6 +76,7 @@ class ProductController extends Controller
 
         $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
         $data['featured'] = $request->boolean('featured');
+        $data['is_approved'] = true; // Admin-created products are auto-approved
 
         Product::create($data);
 
@@ -107,7 +117,6 @@ class ProductController extends Controller
 
         $data['featured'] = $request->boolean('featured');
 
-        // Only update slug if name changed
         if ($data['name'] !== $product->name) {
             $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
         }
@@ -124,5 +133,29 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    // ── Approval actions ────────────────────────────────────────────
+
+    public function approve(Product $product): RedirectResponse
+    {
+        $product->update([
+            'is_approved' => true,
+            'status'      => 'active',
+        ]);
+
+        return redirect()->route('admin.products.index')
+            ->with('success', "Product \"{$product->name}\" approved.");
+    }
+
+    public function reject(Product $product): RedirectResponse
+    {
+        $product->update([
+            'is_approved' => false,
+            'status'      => 'inactive',
+        ]);
+
+        return redirect()->route('admin.products.index')
+            ->with('success', "Product \"{$product->name}\" rejected.");
     }
 }

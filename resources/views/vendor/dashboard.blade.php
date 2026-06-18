@@ -179,20 +179,23 @@
                 </div>
             </a>
 
-            {{-- Products (placeholder) --}}
-            <div class="group animate-slide-up bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default" style="animation-delay: 0.35s;">
+            {{-- Products --}}
+            <a href="{{ route('vendor.products.index') }}" class="group animate-slide-up bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300" style="animation-delay: 0.35s;">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 dark:from-teal-600 dark:to-emerald-700 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-gray-900 dark:text-white">Products</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Manage your products <span class="inline-flex items-center gap-1 text-teal-500 dark:text-teal-400 text-xs font-medium ml-1 px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-900/20">coming soon</span></p>
+                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors duration-200">My Products</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Manage your product catalog</p>
                     </div>
+                    <svg class="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-teal-500 group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </div>
-            </div>
+            </a>
         </div>
     @endif
 @endsection

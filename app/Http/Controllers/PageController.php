@@ -13,9 +13,9 @@ class PageController extends Controller
     public function home(): View
     {
         $categories   = Category::active()->root()->ordered()->get();
-        $featured     = Product::active()->featured()->with('vendor', 'category')->inStock()->take(8)->get();
+        $featured     = Product::active()->approved()->featured()->with('vendor', 'category')->inStock()->take(8)->get();
         $vendors      = Vendor::active()->verified()->take(6)->get();
-        $newProducts  = Product::active()->with('vendor')->latest()->take(4)->get();
+        $newProducts  = Product::active()->approved()->with('vendor')->latest()->take(4)->get();
         return view('pages.home', compact('categories', 'featured', 'vendors', 'newProducts'));
     }
 
@@ -37,7 +37,7 @@ class PageController extends Controller
         foreach ($category->children as $child) {
             $productIds[] = $child->id;
         }
-        $products = Product::active()->whereIn('category_id', $productIds)
+        $products = Product::active()->approved()->whereIn('category_id', $productIds)
             ->with('vendor', 'category')
             ->paginate(12);
         return view('pages.category', compact('category', 'products'));
@@ -45,7 +45,7 @@ class PageController extends Controller
 
     public function products(Request $request): View
     {
-        $query = Product::active()->with('vendor', 'category');
+        $query = Product::active()->approved()->with('vendor', 'category');
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
@@ -80,12 +80,12 @@ class PageController extends Controller
 
     public function product(string $slug): View
     {
-        $product = Product::active()
+        $product = Product::active()->approved()
             ->with(['vendor', 'category'])
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $related = Product::active()
+        $related = Product::active()->approved()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->with('vendor')

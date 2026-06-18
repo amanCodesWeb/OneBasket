@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\AuthController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
+use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
+use App\Http\Controllers\Vendor\ProductController as VendorProductController;
 use App\Http\Controllers\Vendor\ProfileController;
 use App\Http\Controllers\Vendor\AuthController as VendorAuthController;
 use App\Http\Controllers\VendorApplicationController;
@@ -118,6 +121,14 @@ Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->na
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+
+    // Product approval
+    Route::post('/products/{product}/approve', [ProductController::class, 'approve'])->name('products.approve');
+    Route::post('/products/{product}/reject', [ProductController::class, 'reject'])->name('products.reject');
+
+    // Settings
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
 // ── Vendor Portal (vendors only) ───────────────────────────────
@@ -125,4 +136,16 @@ Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->name('vendor.')->g
     Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Products
+    Route::get('/products', [VendorProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [VendorProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [VendorProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit', [VendorProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [VendorProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [VendorProductController::class, 'destroy'])->name('products.destroy');
+
+    // Orders
+    Route::get('/orders', [VendorOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [VendorOrderController::class, 'show'])->name('orders.show');
 });
