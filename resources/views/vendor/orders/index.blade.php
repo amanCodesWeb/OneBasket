@@ -12,18 +12,33 @@
 @section('content')
     <div class="animate-fade-in">
         {{-- Stats bar --}}
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-4 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Orders</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white mt-1">{{ $counts['total'] }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Orders</p>
+                    <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $counts['total'] }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-4 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</p>
-                <p class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">{{ $orders->where('status', 'pending')->count() }}</p>
+            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</p>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $orders->where('status', 'pending')->count() }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-4 shadow-sm">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Delivered</p>
-                <p class="text-xl font-bold text-green-600 dark:text-green-400 mt-1">{{ $orders->where('status', 'delivered')->count() }}</p>
+            <div class="bg-white dark:bg-gray-800/90 rounded-xl border border-gray-100 dark:border-gray-700/60 p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Delivered</p>
+                    <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $orders->where('status', 'delivered')->count() }}</p>
             </div>
         </div>
 
