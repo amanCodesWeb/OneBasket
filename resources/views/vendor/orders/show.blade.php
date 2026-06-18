@@ -47,6 +47,28 @@
             </div>
         </div>
 
+        {{-- Vendor actions --}}
+        @if($order->status === \App\Models\Order::STATUS_CONFIRMED)
+            <div class="mb-6 p-5 rounded-2xl bg-gradient-to-br from-teal-50 to-emerald-50/80 dark:from-teal-900/20 dark:to-emerald-900/10 border border-teal-200/80 dark:border-teal-700/50 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">Pack this order</p>
+                        <p class="text-xs text-teal-600/70 dark:text-teal-400/60 mt-0.5">Mark as packed once you've completed packaging.</p>
+                    </div>
+                    <form method="POST" action="{{ route('vendor.orders.mark-as-packed', $order) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Mark as Packed
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endif
+
         {{-- Your Items --}}
         <div class="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/60">

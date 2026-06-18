@@ -61,4 +61,26 @@ class OrderController extends Controller
 
         return view('vendor.orders.show', compact('order', 'vendorItems', 'vendor'));
     }
+
+    public function markAsPacked(Order $order): RedirectResponse
+    {
+        $vendor = auth()->user()->vendor;
+
+        $belongsToVendor = OrderItem::where('order_id', $order->id)
+            ->where('vendor_id', $vendor->id)
+            ->exists();
+
+        if (! $belongsToVendor) {
+            abort(403);
+        }
+
+        if ($order->status !== Order::STATUS_CONFIRMED) {
+            return back()->with('error', 'Only confirmed orders can be marked as packed.');
+        }
+
+        $order->update(['status' => Order::STATUS_PACKED]);
+
+        return redirect()->route('vendor.orders.show', $order)
+            ->with('success', 'Order marked as packed successfully.');
+    }
 }
