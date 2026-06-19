@@ -32,7 +32,7 @@ class OrderController extends Controller
         }
 
         $orders = $query->latest()->paginate(20);
-        $statuses = Order::$statuses;
+        $statuses = Order::$vendorStatuses;
 
         return view('admin.orders.index', compact('orders', 'statuses'));
     }
@@ -43,7 +43,7 @@ class OrderController extends Controller
     public function show(Order $order): View
     {
         $order->load('user', 'items.product.vendor');
-        $statuses = Order::$statuses;
+        $statuses = Order::$vendorStatuses;
 
         return view('admin.orders.show', compact('order', 'statuses'));
     }
@@ -54,7 +54,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
         $request->validate([
-            'status' => ['required', 'in:' . implode(',', Order::$statuses)],
+            'status' => ['required', 'in:' . implode(',', Order::$vendorStatuses)],
         ]);
 
         $order->update(['status' => $request->status]);

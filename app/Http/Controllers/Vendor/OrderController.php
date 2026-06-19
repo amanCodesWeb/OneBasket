@@ -87,7 +87,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
         $request->validate([
-            'status' => 'required|string|in:' . implode(',', Order::$statuses),
+            'status' => 'required|string|in:' . implode(',', Order::$vendorStatuses),
         ]);
 
         $vendor = auth()->user()->vendor;
