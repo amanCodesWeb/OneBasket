@@ -105,6 +105,12 @@
                         $timelineEvents = collect([
                             ['label' => 'Order Placed', 'time' => $order->created_at, 'icon' => 'shopping-cart', 'active' => true],
                         ]);
+                        if (in_array($order->status, ['packed', 'picked_up', 'out_for_delivery', 'delivered'])) {
+                            $timelineEvents->push(['label' => 'Packed by Vendor', 'time' => $order->updated_at, 'icon' => 'package', 'active' => true]);
+                        }
+                        if (in_array($order->status, ['picked_up', 'out_for_delivery', 'delivered'])) {
+                            $timelineEvents->push(['label' => 'Picked Up', 'time' => $order->updated_at, 'icon' => 'pickup', 'active' => true]);
+                        }
                         if ($order->status === 'processing' || $order->status === 'shipped' || $order->status === 'delivered') {
                             $timelineEvents->push(['label' => 'Processing', 'time' => $order->updated_at, 'icon' => 'refresh', 'active' => true]);
                         }
@@ -128,6 +134,12 @@
                                 @switch($event['icon'])
                                     @case('shopping-cart')
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+                                        @break
+                                    @case('package')
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                        @break
+                                    @case('pickup')
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
                                         @break
                                     @case('refresh')
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
@@ -232,6 +244,36 @@
                         </svg>
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Update Status</h3>
                     </div>
+
+                    {{-- Ready for pickup banner --}}
+                    @if($order->status === 'packed')
+                        <div class="mb-4 p-3 rounded-lg bg-teal-50 dark:bg-teal-900/15 border border-teal-200 dark:border-teal-800/50">
+                            <div class="flex items-start gap-2.5">
+                                <svg class="w-5 h-5 shrink-0 text-teal-600 dark:text-teal-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">Ready for Pickup</p>
+                                    <p class="text-xs text-teal-600/80 dark:text-teal-400/70 mt-0.5">Vendor has packed this order. Send a driver to pick it up.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ route('admin.orders.update-status', $order) }}" class="mb-4">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="picked_up">
+                            <button type="submit"
+                                    class="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-500 text-white text-sm font-medium hover:from-green-700 hover:to-emerald-600 active:from-green-800 active:to-emerald-700 focus:ring-2 focus:ring-green-500/50 focus:outline-none transition-all duration-200 shadow-sm shadow-green-600/20">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
+                                    </svg>
+                                    Mark as Picked Up
+                                </span>
+                            </button>
+                        </form>
+                    @endif
+
                     <form method="POST" action="{{ route('admin.orders.update-status', $order) }}">
                         @csrf
                         @method('PATCH')

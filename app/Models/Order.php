@@ -30,6 +30,7 @@ class Order extends Model
     const STATUS_COLLECTED        = 'collected';
     const STATUS_PACKING          = 'packing';
     const STATUS_PACKED           = 'packed';
+    const STATUS_PICKED_UP        = 'picked_up';
     const STATUS_OUT_FOR_DELIVERY = 'out_for_delivery';
     const STATUS_DELIVERED        = 'delivered';
     const STATUS_CANCELLED        = 'cancelled';
@@ -42,6 +43,7 @@ class Order extends Model
         self::STATUS_COLLECTED,
         self::STATUS_PACKING,
         self::STATUS_PACKED,
+        self::STATUS_PICKED_UP,
         self::STATUS_OUT_FOR_DELIVERY,
         self::STATUS_DELIVERED,
         self::STATUS_CANCELLED,
@@ -71,6 +73,33 @@ class Order extends Model
         self::ORDER_STATUS_SHIPPED,
         self::ORDER_STATUS_DELIVERED,
         self::ORDER_STATUS_CANCELLED,
+    ];
+
+    // ── Statuses relevant to vendor view ──────────────────────
+    public static array $vendorStatuses = [
+        self::STATUS_PENDING,
+        self::STATUS_PACKED,
+        self::STATUS_PICKED_UP,
+        self::STATUS_CANCELLED,
+        self::STATUS_DELIVERED,
+    ];
+
+    // ── Vendor-facing status labels & colors ───────────────────
+    public static array $vendorStatusLabels = [
+        'pending'    => 'Open',
+        'packed'     => 'Packed',
+        'picked_up'  => 'Picked Up',
+        'cancelled'  => 'Cancelled',
+        'delivered'  => 'Delivered',
+    ];
+
+    public static array $vendorStatusColors = [
+        'pending'    => 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700/50',
+        'confirmed'  => 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-700/50',
+        'packed'     => 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700/50',
+        'picked_up'  => 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700/50',
+        'cancelled'  => 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700/50',
+        'delivered'  => 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700/50',
     ];
 
     // ── Boot ──────────────────────────────────────────────────────
@@ -127,6 +156,7 @@ class Order extends Model
             self::STATUS_COLLECTED        => 'Collected',
             self::STATUS_PACKING          => 'Packing',
             self::STATUS_PACKED           => 'Packed',
+            self::STATUS_PICKED_UP        => 'Picked Up',
             self::STATUS_OUT_FOR_DELIVERY => 'Out for Delivery',
             self::STATUS_DELIVERED        => 'Delivered',
             self::STATUS_CANCELLED        => 'Cancelled',
@@ -145,6 +175,7 @@ class Order extends Model
             self::STATUS_COLLECTED        => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
             self::STATUS_PACKING          => 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
             self::STATUS_PACKED           => 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+            self::STATUS_PICKED_UP        => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
             self::STATUS_OUT_FOR_DELIVERY => 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
             self::STATUS_DELIVERED        => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
             self::STATUS_CANCELLED        => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',

@@ -6,10 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    /**
+     * Allowed vendor status transitions.
+     */
+    protected array $allowedTransitions = [
+        'pending'   => ['packed', 'cancelled'],
+        'packed'    => ['pending'], // revert if needed
+    ];
+
     public function index(Request $request): View
     {
         $vendor = auth()->user()->vendor;
@@ -35,12 +44,22 @@ class OrderController extends Controller
             $order->vendor_subtotal = $vendorItems->sum('subtotal');
         });
 
-        $statuses = Order::$statuses;
+        $vendorStatuses = Order::$vendorStatuses;
+
+        $vendorBase = Order::whereHas('items', fn($q) => $q->where('vendor_id', $vendor->id));
         $counts = [
-            'total' => Order::whereHas('items', fn($q) => $q->where('vendor_id', $vendor->id))->count(),
+            'total'     => (clone $vendorBase)->count(),
+            'pending'   => (clone $vendorBase)->where('status', 'pending')->count(),
+            'packed'    => (clone $vendorBase)->where('status', 'packed')->count(),
+            'picked_up' => (clone $vendorBase)->where('status', 'picked_up')->count(),
+            'cancelled' => (clone $vendorBase)->where('status', 'cancelled')->count(),
+            'delivered' => (clone $vendorBase)->where('status', 'delivered')->count(),
         ];
 
-        return view('vendor.orders.index', compact('orders', 'statuses', 'counts', 'vendor'));
+        $allowedTransitions = $this->allowedTransitions;
+        $vendorStatusLabels = Order::$vendorStatusLabels;
+
+        return view('vendor.orders.index', compact('orders', 'vendorStatuses', 'counts', 'vendor', 'allowedTransitions', 'vendorStatusLabels'));
     }
 
     public function show(Order $order): View
@@ -59,11 +78,18 @@ class OrderController extends Controller
 
         $order->load('items.product');
 
-        return view('vendor.orders.show', compact('order', 'vendorItems', 'vendor'));
+        $allowedTransitions = $this->allowedTransitions;
+        $vendorStatusLabels = Order::$vendorStatusLabels;
+
+        return view('vendor.orders.show', compact('order', 'vendorItems', 'vendor', 'allowedTransitions', 'vendorStatusLabels'));
     }
 
-    public function markAsPacked(Order $order): RedirectResponse
+    public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        $request->validate([
+            'status' => 'required|string|in:' . implode(',', Order::$statuses),
+        ]);
+
         $vendor = auth()->user()->vendor;
 
         $belongsToVendor = OrderItem::where('order_id', $order->id)
@@ -74,13 +100,17 @@ class OrderController extends Controller
             abort(403);
         }
 
-        if ($order->status !== Order::STATUS_CONFIRMED) {
-            return back()->with('error', 'Only confirmed orders can be marked as packed.');
+        $targetStatus = $request->status;
+
+        // Check transition is allowed
+        $allowed = $this->allowedTransitions[$order->status] ?? [];
+        if (! in_array($targetStatus, $allowed)) {
+            return back()->with('error', "Cannot change status from {$order->status_label} to " . (new Order)->setAttribute('status', $targetStatus)->status_label . ".");
         }
 
-        $order->update(['status' => Order::STATUS_PACKED]);
+        $order->update(['status' => $targetStatus]);
 
-        return redirect()->route('vendor.orders.show', $order)
-            ->with('success', 'Order marked as packed successfully.');
+        return redirect()->route('vendor.orders.index')
+            ->with('success', "Order #{$order->order_number} status updated to " . (Order::$vendorStatusLabels[$targetStatus] ?? $targetStatus) . ".");
     }
 }

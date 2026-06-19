@@ -148,5 +148,5 @@ Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->name('vendor.')->g
     // Orders
     Route::get('/orders', [VendorOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [VendorOrderController::class, 'show'])->name('orders.show');
-    Route::patch('/orders/{order}/mark-as-packed', [VendorOrderController::class, 'markAsPacked'])->name('orders.mark-as-packed');
+    Route::patch('/orders/{order}/status', [VendorOrderController::class, 'updateStatus'])->name('orders.update-status');
 });
