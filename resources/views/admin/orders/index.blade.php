@@ -7,9 +7,9 @@
 
 @php
     $totalOrders = $orders->total();
-    $pendingCount = $orders->filter(fn($o) => $o->status === 'pending')->count();
-    $processingCount = $orders->filter(fn($o) => $o->status === 'processing')->count();
-    $completedCount = $orders->filter(fn($o) => $o->status === 'delivered')->count();
+    $openCount = $orders->filter(fn($o) => $o->order_status === 'open')->count();
+    $inProgressCount = $orders->filter(fn($o) => \in_array($o->order_status, ['paid', 'in_progress', 'shipped']))->count();
+    $completedCount = $orders->filter(fn($o) => $o->order_status === 'delivered')->count();
 @endphp
 
 @section('content')
@@ -39,8 +39,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</p>
-                    <p class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{{ $pendingCount }}</p>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Open</p>
+                    <p class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{{ $openCount }}</p>
                 </div>
             </div>
         </div>
@@ -54,8 +54,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Processing</p>
-                    <p class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">{{ $processingCount }}</p>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">In Progress</p>
+                    <p class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">{{ $inProgressCount }}</p>
                 </div>
             </div>
         </div>
@@ -104,11 +104,25 @@
                             </svg>
                         </div>
                     </div>
+                    <div class="relative">
+                        <select name="vendor_status"
+                                class="w-full sm:w-44 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 outline-none appearance-none transition-all duration-200">
+                            <option value="">All Vendor Statuses</option>
+                            @foreach($vendorStatuses as $s)
+                                <option value="{{ $s }}" @selected(request('vendor_status') === $s)>{{ \App\Models\Order::$vendorStatusLabels[$s] ?? ucwords(str_replace('_', ' ', $s)) }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                            </svg>
+                        </div>
+                    </div>
                     <button type="submit"
                             class="px-5 py-2.5 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 active:bg-primary-800 focus:ring-2 focus:ring-primary-500/50 focus:outline-none transition-all duration-200 shadow-sm shadow-primary-600/20 whitespace-nowrap">
                         Filter
                     </button>
-                    @if(request()->anyFilled(['search', 'status']))
+                    @if(request()->anyFilled(['search', 'status', 'vendor_status']))
                         <a href="{{ route('admin.orders.index') }}"
                            class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors whitespace-nowrap">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -133,6 +147,7 @@
                         <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Items</th>
                         <th class="text-right px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
                         <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                        <th class="text-center px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Vendor</th>
                         <th class="text-left px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
                         <th class="text-right px-6 py-3.5 font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
                     </tr>
@@ -167,19 +182,24 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-                                    @switch($order->status)
-                                        @case('pending') bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 @break
-                                        @case('processing') bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 @break
+                                    @switch($order->order_status)
+                                        @case('open') bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 @break
+                                        @case('paid') bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 @break
+                                        @case('in_progress') bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 @break
                                         @case('shipped') bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50 @break
                                         @case('delivered') bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 @break
                                         @case('cancelled') bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700/50 @break
+                                        @case('failed') bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700/50 @break
                                         @default bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 @endswitch
                                 ">
-                                    @switch($order->status)
-                                        @case('pending')
+                                    @switch($order->order_status)
+                                        @case('open')
                                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             @break
-                                        @case('processing')
+                                        @case('paid')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                                            @break
+                                        @case('in_progress')
                                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"/></svg>
                                             @break
                                         @case('shipped')
@@ -191,8 +211,37 @@
                                         @case('cancelled')
                                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                             @break
+                                        @case('failed')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                                            @break
                                     @endswitch
-                                    {{ ucwords(str_replace('_', ' ', $order->status)) }}
+                                    {{ $order->order_status_label }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+                                    @switch($order->status)
+                                        @case('pending') bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 @break
+                                        @case('packed') bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700/50 @break
+                                        @case('picked_up') bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 @break
+                                        @case('cancelled') bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700/50 @break
+                                        @default bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 @endswitch
+                                ">
+                                    @switch($order->status)
+                                        @case('pending')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            @break
+                                        @case('packed')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                            @break
+                                        @case('picked_up')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
+                                            @break
+                                        @case('cancelled')
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            @break
+                                    @endswitch
+                                    {{ $order->status_label }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -216,13 +265,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center">
+                            <td colspan="8" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
                                     </svg>
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">No orders found</p>
-                                    @if(request()->anyFilled(['search', 'status']))
+                                    @if(request()->anyFilled(['search', 'status', 'vendor_status']))
                                         <a href="{{ route('admin.orders.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">Clear filters</a>
                                     @endif
                                 </div>

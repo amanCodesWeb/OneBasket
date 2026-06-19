@@ -53,7 +53,6 @@ class OrderController extends Controller
             'packed'    => (clone $vendorBase)->where('status', 'packed')->count(),
             'picked_up' => (clone $vendorBase)->where('status', 'picked_up')->count(),
             'cancelled' => (clone $vendorBase)->where('status', 'cancelled')->count(),
-            'delivered' => (clone $vendorBase)->where('status', 'delivered')->count(),
         ];
 
         $allowedTransitions = $this->allowedTransitions;

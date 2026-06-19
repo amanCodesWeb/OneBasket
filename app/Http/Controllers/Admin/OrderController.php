@@ -17,9 +17,14 @@ class OrderController extends Controller
     {
         $query = Order::with('user');
 
-        // Status filter
+        // Status filter (order_status)
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('order_status', $request->status);
+        }
+
+        // Vendor status filter
+        if ($request->filled('vendor_status')) {
+            $query->where('status', $request->vendor_status);
         }
 
         // Search by order number or user email
@@ -32,9 +37,10 @@ class OrderController extends Controller
         }
 
         $orders = $query->latest()->paginate(20);
-        $statuses = Order::$vendorStatuses;
+        $statuses = Order::$orderStatuses;
+        $vendorStatuses = Order::$vendorStatuses;
 
-        return view('admin.orders.index', compact('orders', 'statuses'));
+        return view('admin.orders.index', compact('orders', 'statuses', 'vendorStatuses'));
     }
 
     /**
@@ -43,7 +49,7 @@ class OrderController extends Controller
     public function show(Order $order): View
     {
         $order->load('user', 'items.product.vendor');
-        $statuses = Order::$vendorStatuses;
+        $statuses = Order::$orderStatuses;
 
         return view('admin.orders.show', compact('order', 'statuses'));
     }
@@ -53,12 +59,20 @@ class OrderController extends Controller
      */
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        // Order-level status update (dropdown)
+        if ($request->filled('order_status')) {
+            $request->validate([
+                'order_status' => ['required', 'in:' . implode(',', Order::$orderStatuses)],
+            ]);
+            $order->update(['order_status' => $request->order_status]);
+            return back()->with('success', 'Order status updated to ' . $order->order_status_label . '.');
+        }
+
+        // Vendor fulfillment status update (quick action buttons)
         $request->validate([
             'status' => ['required', 'in:' . implode(',', Order::$vendorStatuses)],
         ]);
-
         $order->update(['status' => $request->status]);
-
-        return back()->with('success', "Order status updated to " . $order->status_label . ".");
+        return back()->with('success', 'Fulfillment status updated to ' . $order->status_label . '.');
     }
 }
