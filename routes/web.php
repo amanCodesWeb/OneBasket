@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VendorController;
@@ -90,7 +92,8 @@ Route::middleware('auth')->group(function () {
 });
 
 // ── Admin (Super Admin + Ops Manager) ──────────────────────────
-Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Vendor management
@@ -107,6 +110,23 @@ Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->na
     Route::post('/vendors/{vendor}/reject', [VendorController::class, 'reject'])->name('vendors.reject');
     Route::post('/vendors/{vendor}/suspend', [VendorController::class, 'suspend'])->name('vendors.suspend');
     Route::post('/vendors/{vendor}/activate', [VendorController::class, 'activate'])->name('vendors.activate');
+
+    // Product categories
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Product features
+    Route::get('/features', [FeatureController::class, 'index'])->name('features.index');
+    Route::get('/features/create', [FeatureController::class, 'create'])->name('features.create');
+    Route::post('/features', [FeatureController::class, 'store'])->name('features.store');
+    Route::get('/features/{feature}/edit', [FeatureController::class, 'edit'])->name('features.edit');
+    Route::put('/features/{feature}', [FeatureController::class, 'update'])->name('features.update');
+    Route::delete('/features/{feature}', [FeatureController::class, 'destroy'])->name('features.destroy');
 
     // Product management
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -132,7 +152,8 @@ Route::middleware(['auth', 'role:super_admin,ops_manager'])->prefix('admin')->na
 });
 
 // ── Vendor Portal (vendors only) ───────────────────────────────
-Route::middleware(['auth', 'role:vendor'])->prefix('vendor')->name('vendor.')->group(function () {
+Route::middleware('vendor')->prefix('vendor')->name('vendor.')->group(function () {
+    Route::get('/', fn () => redirect()->route('vendor.dashboard'));
     Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

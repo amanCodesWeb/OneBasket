@@ -44,6 +44,13 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function features()
+    {
+        return $this->belongsToMany(Feature::class, 'feature_product')
+            ->withPivot('value')
+            ->withTimestamps();
+    }
+
     // ── Accessors ────────────────────────────────────────────────
     public function getThumbnailAttribute(): ?string
     {

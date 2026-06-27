@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Feature;
 use App\Models\Product;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
@@ -54,8 +55,9 @@ class ProductController extends Controller
         $statuses   = ['active', 'inactive', 'draft'];
         $vendors    = Vendor::active()->get();
         $categories = Category::active()->ordered()->with('children')->get();
+        $features   = Feature::active()->ordered()->get();
 
-        return view('admin.products.form', compact('statuses', 'vendors', 'categories'));
+        return view('admin.products.form', compact('statuses', 'vendors', 'categories', 'features'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -78,7 +80,10 @@ class ProductController extends Controller
         $data['featured'] = $request->boolean('featured');
         $data['is_approved'] = true; // Admin-created products are auto-approved
 
-        Product::create($data);
+        $product = Product::create($data);
+
+        // Sync features
+        $this->syncFeatures($product, $request);
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
@@ -86,7 +91,7 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        $product->load('vendor', 'category');
+        $product->load('vendor', 'category', 'features');
         return view('admin.products.show', compact('product'));
     }
 
@@ -95,8 +100,11 @@ class ProductController extends Controller
         $statuses   = ['active', 'inactive', 'draft'];
         $vendors    = Vendor::active()->get();
         $categories = Category::active()->ordered()->with('children')->get();
+        $features   = Feature::active()->ordered()->get();
 
-        return view('admin.products.form', compact('product', 'statuses', 'vendors', 'categories'));
+        $product->load('features');
+
+        return view('admin.products.form', compact('product', 'statuses', 'vendors', 'categories', 'features'));
     }
 
     public function update(Request $request, Product $product): RedirectResponse
@@ -123,6 +131,9 @@ class ProductController extends Controller
 
         $product->update($data);
 
+        // Sync features
+        $this->syncFeatures($product, $request);
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully.');
     }
@@ -133,6 +144,30 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    // ── Feature sync ────────────────────────────────────────────────
+
+    private function syncFeatures(Product $product, Request $request): void
+    {
+        $features = $request->input('features', []);
+
+        if (empty($features)) {
+            $product->features()->detach();
+            return;
+        }
+
+        $sync = [];
+        foreach ($features as $featureId => $value) {
+            if (is_array($value)) {
+                $value = implode(', ', $value); // multi_select → comma-separated
+            }
+            if ($value !== '' && $value !== null) {
+                $sync[$featureId] = ['value' => $value];
+            }
+        }
+
+        $product->features()->sync($sync);
     }
 
     // ── Approval actions ────────────────────────────────────────────
