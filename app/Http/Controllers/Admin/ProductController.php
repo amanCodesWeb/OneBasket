@@ -73,7 +73,10 @@ class ProductController extends Controller
             'unit'          => ['nullable', 'string', 'max:50'],
             'status'        => ['required', 'in:active,inactive,draft'],
             'featured'      => ['boolean'],
-            'images'        => ['nullable', 'json'],
+            'images_source' => ['nullable', 'in:url,upload'],
+            'images_url'    => ['nullable', 'string'],
+            'upload_images' => ['nullable', 'array'],
+            'upload_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             // Shipping fields
             'weight'        => ['nullable', 'numeric', 'min:0'],
             'length'        => ['nullable', 'numeric', 'min:0'],
@@ -85,6 +88,9 @@ class ProductController extends Controller
         $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
         $data['featured'] = $request->boolean('featured');
         $data['is_approved'] = true; // Admin-created products are auto-approved
+
+        // Handle images
+        $data['images'] = $this->processImages($request);
 
         $product = Product::create($data);
 
@@ -126,7 +132,10 @@ class ProductController extends Controller
             'unit'          => ['nullable', 'string', 'max:50'],
             'status'        => ['required', 'in:active,inactive,draft'],
             'featured'      => ['boolean'],
-            'images'        => ['nullable', 'json'],
+            'images_source' => ['nullable', 'in:url,upload'],
+            'images_url'    => ['nullable', 'string'],
+            'upload_images' => ['nullable', 'array'],
+            'upload_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             // Shipping fields
             'weight'        => ['nullable', 'numeric', 'min:0'],
             'length'        => ['nullable', 'numeric', 'min:0'],
@@ -140,6 +149,9 @@ class ProductController extends Controller
         if ($data['name'] !== $product->name) {
             $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
         }
+
+        // Handle images
+        $data['images'] = $this->processImages($request, $product);
 
         $product->update($data);
 
@@ -159,6 +171,35 @@ class ProductController extends Controller
     }
 
     // ── Feature sync ────────────────────────────────────────────────
+
+    private function processImages(Request $request, ?Product $product = null): ?array
+    {
+        if ($request->images_source === 'upload' && $request->hasFile('upload_images')) {
+            $uploaded = [];
+            foreach ($request->file('upload_images') as $file) {
+                $path = $file->store('products', 'public');
+                $uploaded[] = '/storage/' . $path;
+            }
+            return $uploaded;
+        }
+
+        if ($request->images_source === 'url') {
+            if ($request->filled('images_url')) {
+                $urls = array_map('trim', explode(',', $request->images_url));
+                $urls = array_values(array_filter($urls));
+                return !empty($urls) ? $urls : null;
+            }
+            // URL mode with empty input → clear images
+            return null;
+        }
+
+        // Upload mode without files → keep existing (for update) or null (for create)
+        if ($product) {
+            return $product->images;
+        }
+
+        return null;
+    }
 
     private function syncFeatures(Product $product, Request $request): void
     {

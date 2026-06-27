@@ -16,7 +16,7 @@
     </div>
 
     <div class="max-w-4xl">
-        <form method="POST" action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-6">
+        <form method="POST" action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-6" enctype="multipart/form-data">
             @csrf
             @if(isset($product)) @method('PUT') @endif
 
@@ -144,7 +144,6 @@
                                     <svg class="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                                 @error('category_id') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -253,20 +252,75 @@
                                 </label>
                             </div>
                         </div>
-
-                        {{-- Images --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Images (JSON array of URLs)</label>
-                            <div class="relative">
-                                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                <input type="text" name="images" value="{{ old('images', is_array($product->images ?? null) ? json_encode($product->images) : ($product->images ?? '[]')) }}"
-                                       class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition font-mono @error('images') border-red-500 dark:border-red-500 @enderror"
-                                       placeholder='["https://example.com/image.jpg"]'>
-                            </div>
-                            @error('images') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
                         </div>
+                        </div>
+
+                {{-- === Product Images === --}}
+                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                    <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-sky-50/50 to-transparent dark:from-sky-900/10 dark:to-transparent">
+                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900/30 dark:to-sky-800/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product Images</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Add images via URL links or upload files</p>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-5">
+                        {{-- Current images preview --}}
+                        @if(isset($product) && is_array($product->images) && count($product->images) > 0)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Images</label>
+                                <div class="flex flex-wrap gap-3">
+                                    @foreach($product->images as $img)
+                                        <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm group">
+                                            <img src="{{ $img }}" alt="" class="w-full h-full object-cover" onerror="this.closest('div').style.display='none'">
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Source toggle --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Source</label>
+                            <div class="flex gap-5">
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="images_source" value="url" class="text-primary-600 focus:ring-primary-500" checked onclick="toggleImageSource('url')">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">URL Links</span>
+                                </label>
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="images_source" value="upload" onclick="toggleImageSource('upload')">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">Upload Files</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- URL input --}}
+                        <div id="images-url-section">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Image URLs</label>
+                            <div class="relative">
+                                <svg class="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                <textarea name="images_url" rows="3" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                                          class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition font-mono">{{ old('images_url', isset($product) && is_array($product->images) ? implode(', ', $product->images) : '') }}</textarea>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-400">Enter image URLs separated by commas</p>
+                        </div>
+
+                        {{-- Upload input --}}
+                        <div id="images-upload-section" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Upload Images</label>
+                            <input type="file" name="upload_images[]" multiple accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                   class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-sky-50 dark:file:bg-sky-900/30 file:text-sky-700 dark:file:text-sky-300 hover:file:bg-sky-100 dark:hover:file:bg-sky-900/40 transition cursor-pointer file:cursor-pointer">
+                            <p class="mt-1 text-xs text-gray-400">Select multiple images (JPEG, PNG, WebP). Max 2MB each.</p>
+                            @error('upload_images.*') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                        </div>
+
+                        <p class="text-xs text-gray-400">Images are stored as a JSON array. URLs are stored as-is; uploaded files are saved to storage.</p>
                     </div>
                 </div>
             </div>
@@ -439,29 +493,18 @@
                 @endif
             </div>
 
-            {{-- Form Actions --}}
-            <div class="flex items-center justify-between gap-4 p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/80">
-                <div class="text-xs text-gray-400">
-                    <span class="text-red-500">*</span> Required fields
-                </div>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('admin.products.index') }}" 
-                       class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                        Cancel
-                    </a>
-                    <button type="submit" 
-                            class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow-md hover:shadow-primary-500/20">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            @if(isset($product))
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                            @else
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                            @endif
-                        </svg>
-                        {{ isset($product) ? 'Update Product' : 'Create Product' }}
-                    </button>
-                </div>
+            {{-- Submit --}}
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <a href="{{ route('admin.products.index') }}" 
+                   class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30">
+                    {{ isset($product) ? 'Update Product' : 'Create Product' }}
+                </button>
             </div>
+
         </form>
     </div>
 @endsection
@@ -480,4 +523,12 @@ function switchTab(tab) {
     activeBtn.classList.add('border-primary-600', 'text-primary-600', 'dark:text-primary-400', 'dark:border-primary-400');
     activeBtn.setAttribute('aria-selected', 'true');
 }
+
+function toggleImageSource(source) {
+    document.getElementById('images-url-section').style.display = source === 'url' ? 'block' : 'none';
+    document.getElementById('images-upload-section').style.display = source === 'upload' ? 'block' : 'none';
+}
+
+// Initialize with General tab selected
+document.addEventListener('DOMContentLoaded', () => switchTab('general'));
 </script>
