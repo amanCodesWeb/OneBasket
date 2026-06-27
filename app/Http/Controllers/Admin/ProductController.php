@@ -74,6 +74,12 @@ class ProductController extends Controller
             'status'        => ['required', 'in:active,inactive,draft'],
             'featured'      => ['boolean'],
             'images'        => ['nullable', 'json'],
+            // Shipping fields
+            'weight'        => ['nullable', 'numeric', 'min:0'],
+            'length'        => ['nullable', 'numeric', 'min:0'],
+            'width'         => ['nullable', 'numeric', 'min:0'],
+            'height'        => ['nullable', 'numeric', 'min:0'],
+            'items_in_pack' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
@@ -121,6 +127,12 @@ class ProductController extends Controller
             'status'        => ['required', 'in:active,inactive,draft'],
             'featured'      => ['boolean'],
             'images'        => ['nullable', 'json'],
+            // Shipping fields
+            'weight'        => ['nullable', 'numeric', 'min:0'],
+            'length'        => ['nullable', 'numeric', 'min:0'],
+            'width'         => ['nullable', 'numeric', 'min:0'],
+            'height'        => ['nullable', 'numeric', 'min:0'],
+            'items_in_pack' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $data['featured'] = $request->boolean('featured');

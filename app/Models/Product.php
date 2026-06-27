@@ -12,6 +12,7 @@ class Product extends Model
         'vendor_id', 'category_id', 'name', 'slug', 'description',
         'price', 'compare_price', 'images', 'status', 'featured',
         'stock_quantity', 'unit', 'is_approved',
+        'weight', 'length', 'width', 'height', 'items_in_pack',
     ];
 
     protected function casts(): array
@@ -23,6 +24,11 @@ class Product extends Model
             'featured'      => 'boolean',
             'stock_quantity'=> 'integer',
             'is_approved'   => 'boolean',
+            'weight'        => 'decimal:2',
+            'length'        => 'decimal:2',
+            'width'         => 'decimal:2',
+            'height'        => 'decimal:2',
+            'items_in_pack' => 'integer',
         ];
     }
 
