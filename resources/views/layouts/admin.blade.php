@@ -48,11 +48,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                         <span class="flex-1 text-left">Products</span>
-                        <svg class="chevron w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="chevron w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.features.*') ? 'transform: rotate(180deg);' : '' }}">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="products-submenu mt-1 space-y-1 pl-4" style="display: none;">
+                    <div class="products-submenu mt-1 space-y-1 pl-4" style="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.features.*') ? '' : 'display: none;' }}">
                         <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 pl-6 pr-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 @if(request()->routeIs('admin.products.*') && !request()->routeIs('admin.categories.*') && !request()->routeIs('admin.features.*')) bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm @else text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white @endif">
                             <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <circle cx="9" cy="9" r="7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none"/>
@@ -126,11 +126,11 @@
                 <div>
                     <button onclick="toggleMobileProducts(this)" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-left">
                         <span class="flex-1">Products</span>
-                        <svg class="chevron w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="chevron w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.features.*') ? 'transform: rotate(180deg);' : '' }}">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="products-submenu pl-6 mt-1 space-y-1" style="display: none;">
+                    <div class="products-submenu pl-6 mt-1 space-y-1" style="{{ request()->routeIs('admin.products.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.features.*') ? '' : 'display: none;' }}">
                         <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">All Products</a>
                         <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Categories</a>
                         <a href="{{ route('admin.features.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Features</a>

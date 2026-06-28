@@ -77,6 +77,8 @@ class ProductController extends Controller
             'images_url'    => ['nullable', 'string'],
             'upload_images' => ['nullable', 'array'],
             'upload_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'delete_images' => ['nullable', 'array'],
+            'delete_images.*' => ['nullable', 'string'],
             // Shipping fields
             'weight'        => ['nullable', 'numeric', 'min:0'],
             'length'        => ['nullable', 'numeric', 'min:0'],
@@ -136,6 +138,8 @@ class ProductController extends Controller
             'images_url'    => ['nullable', 'string'],
             'upload_images' => ['nullable', 'array'],
             'upload_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'delete_images' => ['nullable', 'array'],
+            'delete_images.*' => ['nullable', 'string'],
             // Shipping fields
             'weight'        => ['nullable', 'numeric', 'min:0'],
             'length'        => ['nullable', 'numeric', 'min:0'],
@@ -174,13 +178,25 @@ class ProductController extends Controller
 
     private function processImages(Request $request, ?Product $product = null): ?array
     {
+        // Images to delete (URLs or paths from existing)
+        $delete = $request->input('delete_images', []);
+
+        // Start with existing images (minus deleted ones)
+        $existing = [];
+        if ($product && is_array($product->images)) {
+            $existing = array_values(array_diff($product->images, $delete));
+        }
+
         if ($request->images_source === 'upload' && $request->hasFile('upload_images')) {
+            // Upload new files and merge with existing
             $uploaded = [];
             foreach ($request->file('upload_images') as $file) {
                 $path = $file->store('products', 'public');
                 $uploaded[] = '/storage/' . $path;
             }
-            return $uploaded;
+            return !empty($existing) || !empty($uploaded)
+                ? array_merge($existing, $uploaded)
+                : null;
         }
 
         if ($request->images_source === 'url') {
@@ -193,9 +209,9 @@ class ProductController extends Controller
             return null;
         }
 
-        // Upload mode without files → keep existing (for update) or null (for create)
+        // Upload mode without new files → keep remaining (existing minus deleted)
         if ($product) {
-            return $product->images;
+            return !empty($existing) ? $existing : null;
         }
 
         return null;

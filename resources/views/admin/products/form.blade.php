@@ -4,62 +4,84 @@
 @section('heading', isset($product) ? 'Edit Product' : 'New Product')
 
 @section('content')
-    {{-- Back link --}}
-    <div class="mb-5 fade-in">
-        <a href="{{ route('admin.products.index') }}" 
-           class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
-            <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Back to Products
-        </a>
-    </div>
+    @push('head')
+    <style>
+        main { overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+    </style>
+    @endpush
 
-    <div class="max-w-4xl">
-        <form method="POST" action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-6" enctype="multipart/form-data">
-            @csrf
-            @if(isset($product)) @method('PUT') @endif
+    <form method="POST" action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" class="flex-1 flex flex-col min-h-0" enctype="multipart/form-data">
+        @csrf
+        @if(isset($product)) @method('PUT') @endif
 
-            {{-- Tab Navigation --}}
-            <div class="border-b border-gray-200 dark:border-gray-700">
-                <nav class="flex gap-0 -mb-px" role="tablist">
-                    <button type="button" role="tab" onclick="switchTab('general')" 
-                            class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
-                            id="tab-general" aria-selected="true">
-                        <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        {{-- Always-visible header --}}
+        <div class="shrink-0 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                        {{-- Back link inline in header --}}
+                        <a href="{{ route('admin.products.index') }}"
+                           class="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group shrink-0"
+                           title="Back to Products">
+                            <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                             </svg>
-                            General
-                        </span>
-                    </button>
-                    <button type="button" role="tab" onclick="switchTab('shipping')" 
-                            class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
-                            id="tab-shipping" aria-selected="false">
-                        <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                            </svg>
-                            Shipping
-                        </span>
-                    </button>
-                    <button type="button" role="tab" onclick="switchTab('features')" 
-                            class="tab-btn px-5 py-3 text-sm font-medium border-b-2 transition-colors"
-                            id="tab-features" aria-selected="false">
-                        <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
-                            </svg>
-                            Features
-                        </span>
-                    </button>
-                </nav>
+                            <span class="hidden sm:inline">Back</span>
+                        </a>
+
+                        <nav class="flex gap-0 -mb-px" role="tablist">
+                            <button type="button" role="tab" onclick="switchTab('general')"
+                                    class="tab-btn px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+                                    id="tab-general" aria-selected="true">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    General
+                                </span>
+                            </button>
+                            <button type="button" role="tab" onclick="switchTab('shipping')"
+                                    class="tab-btn px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+                                    id="tab-shipping" aria-selected="false">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                    </svg>
+                                    Shipping
+                                </span>
+                            </button>
+                            <button type="button" role="tab" onclick="switchTab('features')"
+                                    class="tab-btn px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+                                    id="tab-features" aria-selected="false">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+                                    </svg>
+                                    Features
+                                </span>
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('admin.products.index') }}"
+                           class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-2">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="px-5 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30">
+                            {{ isset($product) ? 'Update Product' : 'Create Product' }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
+            {{-- Scrollable content area --}}
+            <div class="flex-1 overflow-y-auto min-h-0 px-4 sm:px-6 lg:px-8 py-4">
+                <div class="max-w-4xl mx-auto space-y-5">
+
             {{-- === TAB: General === --}}
-            <div class="tab-panel" id="panel-general">
+            <div class="tab-panel pt-0 space-y-5" id="panel-general">
                 {{-- Basic Information --}}
-                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/10 dark:to-transparent">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -150,7 +172,7 @@
                 </div>
 
                 {{-- Pricing & Inventory --}}
-                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/10 dark:to-transparent">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -256,7 +278,7 @@
                         </div>
 
                 {{-- === Product Images === --}}
-                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-sky-50/50 to-transparent dark:from-sky-900/10 dark:to-transparent">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900/30 dark:to-sky-800/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -272,14 +294,30 @@
                         {{-- Current images preview --}}
                         @if(isset($product) && is_array($product->images) && count($product->images) > 0)
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Images</label>
-                                <div class="flex flex-wrap gap-3">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Current Images
+                                    <span class="text-xs text-gray-400 font-normal ml-2">(click X to remove)</span>
+                                </label>
+                                <div class="flex flex-wrap gap-3" id="current-images-list">
                                     @foreach($product->images as $img)
-                                        <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm group">
-                                            <img src="{{ $img }}" alt="" class="w-full h-full object-cover" onerror="this.closest('div').style.display='none'">
+                                        <div class="current-image-item relative w-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm group" data-image="{{ $img }}">
+                                            <img src="{{ $img }}" alt="" class="w-20 h-20 object-cover" onerror="this.closest('.current-image-item').style.display='none'">
+                                            <button type="button" onclick="deleteCurrentImage(this)"
+                                                    class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    title="Remove this image">
+                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                            <button type="button" onclick="undoDeleteCurrentImage(this)"
+                                                    class="undo-btn absolute inset-0 bg-green-500/80 text-white text-xs font-semibold hidden items-center justify-center cursor-pointer"
+                                                    title="Undo remove">
+                                                Undo
+                                            </button>
                                         </div>
                                     @endforeach
                                 </div>
+                                <div id="delete-images-container"></div>
                             </div>
                         @endif
 
@@ -326,8 +364,8 @@
             </div>
 
             {{-- === TAB: Shipping === --}}
-            <div class="tab-panel" id="panel-shipping" style="display: none;">
-                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+            <div class="tab-panel pt-0 space-y-5" id="panel-shipping" style="display: none;">
+                <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-900/10 dark:to-transparent">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -392,17 +430,17 @@
                                 <input type="number" min="0" name="items_in_pack" value="{{ old('items_in_pack', $product->items_in_pack ?? '') }}"
                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition @error('items_in_pack') border-red-500 dark:border-red-500 @enderror"
                                        placeholder="e.g. 12">
-                            </div>
-                            @error('items_in_pack') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
+                                </div>
+                                @error('items_in_pack') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- === TAB: Features === --}}
-            <div class="tab-panel" id="panel-features" style="display: none;">
+            <div class="tab-panel pt-0 space-y-5" id="panel-features" style="display: none;">
                 @if(isset($features) && $features->count())
-                <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-900/10 dark:to-transparent">
                         <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -481,7 +519,7 @@
                     </div>
                 </div>
                 @else
-                    <div class="card-glow bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
+                    <div class="bg-white dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700/80 overflow-hidden">
                         <div class="p-12 text-center">
                             <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
@@ -492,22 +530,11 @@
                     </div>
                 @endif
             </div>
-
-            {{-- Submit --}}
-            <div class="flex items-center justify-end gap-3 pt-2">
-                <a href="{{ route('admin.products.index') }}" 
-                   class="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="px-6 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30">
-                    {{ isset($product) ? 'Update Product' : 'Create Product' }}
-                </button>
+                </div>
             </div>
 
         </form>
-    </div>
-@endsection
+    @endsection
 
 <script>
 function switchTab(tab) {
@@ -527,6 +554,37 @@ function switchTab(tab) {
 function toggleImageSource(source) {
     document.getElementById('images-url-section').style.display = source === 'url' ? 'block' : 'none';
     document.getElementById('images-upload-section').style.display = source === 'upload' ? 'block' : 'none';
+}
+
+function deleteCurrentImage(btn) {
+    const item = btn.closest('.current-image-item');
+    const imgUrl = item.dataset.image;
+    // Add hidden input tracking deletion
+    const container = document.getElementById('delete-images-container');
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'delete_images[]';
+    input.value = imgUrl;
+    input.id = 'del-' + btoa(imgUrl).replace(/[/+=]/g, '_');
+    container.appendChild(input);
+    // Hide the image, show undo button
+    btn.classList.add('hidden');
+    item.querySelector('img').classList.add('hidden');
+    item.querySelector('.undo-btn').classList.remove('hidden');
+    item.querySelector('.undo-btn').classList.add('flex');
+}
+
+function undoDeleteCurrentImage(btn) {
+    const item = btn.closest('.current-image-item');
+    const imgUrl = item.dataset.image;
+    // Remove the hidden input
+    const input = document.getElementById('del-' + btoa(imgUrl).replace(/[/+=]/g, '_'));
+    if (input) input.remove();
+    // Restore image and X button
+    btn.classList.remove('flex');
+    btn.classList.add('hidden');
+    item.querySelector('img').classList.remove('hidden');
+    item.querySelector('button[onclick*="deleteCurrentImage"]').classList.remove('hidden');
 }
 
 // Initialize with General tab selected
